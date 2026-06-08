@@ -208,7 +208,7 @@ select.sel{background:var(--k3);border:1px solid var(--bd);color:var(--w);paddin
 <div id="toast"></div>
 
 <script>
-const JSON_URL = 'https://fichariospfc.netlify.app/dados.json';
+const JSON_URL = new URL('dados.json', document.baseURI).href;
 const POS_ORDER = ['GL','LD','LE','ZG','DF','VL','MC','AT','LT','RP','—'];
 const POS_NAMES = {GL:'Goleiro',LD:'Lateral Direito',LE:'Lateral Esquerdo',ZG:'Zagueiro',DF:'Defensor',VL:'Volante',MC:'Meio-Campo',AT:'Atacante',LT:'Lateral',RP:'Reserva','—':'Indefinida'};
 
