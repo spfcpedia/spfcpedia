@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SPFC Admin — Gerenciar Fotos</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--r:#CC0000;--rd:#990000;--rl:#FF4444;--k:#0D0D0D;--k1:#161616;--k2:#1E1E1E;--k3:#2A2A2A;--k4:#383838;--w:#F0F0EB;--w2:#D8D8D2;--mu:#888;--bd:rgba(255,255,255,0.07);--bd2:rgba(255,255,255,0.15);--green:#22c55e;--blue:#5bc8f0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--k);color:var(--w);min-height:100vh;font-size:14px;}
+
+/* LOADING */
+#loading{position:fixed;inset:0;background:var(--k);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:1rem;}
+.spinner{width:48px;height:48px;border:3px solid var(--bd2);border-top-color:var(--r);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.load-txt{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.1em;color:var(--mu);}
+#load-err{display:none;flex-direction:column;align-items:center;gap:1rem;text-align:center;}
+#load-err .err-icon{font-size:2.5rem;}
+#load-err p{color:var(--mu);font-size:.85rem;max-width:360px;line-height:1.6;}
+#load-err small{color:var(--rl);font-size:.75rem;}
+
+/* HEADER */
+header{background:var(--k1);border-bottom:3px solid var(--r);padding:1rem 2rem;display:flex;align-items:center;gap:1rem;position:sticky;top:0;z-index:100;}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:.06em;}
+.logo span{color:var(--rl);}
+.admin-badge{background:rgba(204,0,0,.2);border:1px solid rgba(204,0,0,.4);color:var(--rl);font-size:.68rem;font-weight:600;padding:.2rem .6rem;border-radius:4px;letter-spacing:.1em;text-transform:uppercase;}
+.netlify-badge{font-size:.68rem;color:rgba(91,200,240,.7);background:rgba(91,200,240,.08);border:1px solid rgba(91,200,240,.2);padding:.2rem .6rem;border-radius:4px;}
+.hactions{margin-left:auto;display:flex;gap:.6rem;align-items:center;}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.5rem 1.1rem;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:500;cursor:pointer;transition:all .15s;border:none;white-space:nowrap;}
+.btn-primary{background:var(--r);color:#fff;}.btn-primary:hover{background:var(--rd);}
+.btn-green{background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.4);color:var(--green);}.btn-green:hover{background:rgba(34,197,94,.25);}
+.btn-blue{background:rgba(91,200,240,.12);border:1px solid rgba(91,200,240,.3);color:var(--blue);}.btn-blue:hover{background:rgba(91,200,240,.22);}
+.btn-ghost{background:var(--k3);border:1px solid var(--bd2);color:var(--w2);}.btn-ghost:hover{border-color:var(--rl);color:var(--rl);}
+.btn-danger{background:rgba(204,0,0,.12);border:1px solid rgba(204,0,0,.3);color:var(--rl);}.btn-danger:hover{background:rgba(204,0,0,.25);}
+
+/* TOOLBAR */
+.toolbar{background:var(--k2);border-bottom:1px solid var(--bd);padding:.75rem 2rem;display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;}
+.search-wrap{position:relative;flex:1;min-width:200px;}
+.search-wrap input{width:100%;background:var(--k3);border:1px solid var(--bd);color:var(--w);padding:.5rem .9rem .5rem 2.4rem;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:.8rem;outline:none;transition:border-color .2s;}
+.search-wrap input:focus{border-color:var(--rl);}
+.search-wrap input::placeholder{color:var(--mu);}
+.s-icon{position:absolute;left:.7rem;top:50%;transform:translateY(-50%);color:var(--mu);font-size:.85rem;pointer-events:none;}
+select.sel{background:var(--k3);border:1px solid var(--bd);color:var(--w);padding:.45rem .7rem;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:.75rem;outline:none;cursor:pointer;}
+.stats-bar{display:flex;gap:1.2rem;margin-left:auto;align-items:center;flex-shrink:0;}
+.stat-chip{font-size:.72rem;color:var(--mu);}
+.stat-chip span{font-weight:600;color:var(--w);}
+.stat-chip.green span{color:var(--green);}
+.stat-chip.blue span{color:var(--blue);}
+
+/* POSITION BADGES */
+.pbadge{font-family:'Bebas Neue',sans-serif;font-size:.78rem;letter-spacing:.1em;padding:.2rem .6rem;border-radius:4px;}
+.GL{background:#0d2a40;color:#5bc8f0;}.LD{background:#0d2a0d;color:#5af05a;}.LE{background:#0d2a0d;color:#5af05a;}
+.ZG{background:#1e0d35;color:#b87af5;}.DF{background:#2a2a0d;color:#efd05a;}.VL{background:#35120d;color:#f07a5b;}
+.MC{background:#35200d;color:#f0a85a;}.AT{background:#35100d;color:#f05a5a;}.LT{background:#0d2a2a;color:#5af0f0;}.RP{background:#252525;color:#999;}
+
+/* GRID */
+.grid-wrap{padding:1.5rem 2rem;}
+.section-hdr{font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:.06em;color:var(--mu);margin-bottom:.75rem;display:flex;align-items:center;gap:.6rem;}
+.player-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:.55rem;margin-bottom:2rem;}
+
+/* PLAYER ROW */
+.player-row{background:var(--k2);border:1px solid var(--bd);border-radius:8px;padding:.75rem;display:flex;gap:.75rem;align-items:center;transition:border-color .15s;}
+.player-row:hover{border-color:var(--bd2);}
+.player-row.has-foto{border-left:3px solid var(--green);}
+.player-row.edited{border-left:3px solid var(--blue);}
+.player-row.has-foto.edited{border-left:3px solid var(--blue);}
+
+/* THUMB */
+.thumb{width:52px;height:52px;border-radius:8px;background:var(--k4);flex-shrink:0;overflow:hidden;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd2);cursor:pointer;position:relative;transition:border-color .2s;}
+.thumb:hover{border-color:var(--blue);}
+.thumb img{width:100%;height:100%;object-fit:cover;}
+.thumb .ini{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--mu);}
+.thumb .ov{position:absolute;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;font-size:.75rem;color:#fff;flex-direction:column;gap:2px;text-align:center;line-height:1.3;}
+.thumb:hover .ov{display:flex;}
+
+.player-info{flex:1;min-width:0;}
+.player-name{font-size:.82rem;font-weight:600;color:var(--w);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.player-meta{font-size:.63rem;color:var(--mu);margin-top:2px;}
+
+/* URL FIELD */
+.url-field{display:flex;gap:.3rem;margin-top:.45rem;align-items:center;}
+.url-field input{flex:1;background:var(--k3);border:1px solid var(--bd);color:var(--w);padding:.35rem .6rem;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:.7rem;outline:none;transition:border-color .2s;min-width:0;}
+.url-field input:focus{border-color:var(--blue);}
+.url-field input::placeholder{color:var(--mu);}
+.url-field input.changed{border-color:var(--blue);}
+.ubtn{padding:.32rem .55rem;border-radius:5px;font-size:.7rem;cursor:pointer;border:none;flex-shrink:0;transition:all .15s;font-family:'DM Sans',sans-serif;}
+.ubtn-ok{background:rgba(91,200,240,.15);border:1px solid rgba(91,200,240,.3);color:var(--blue);}.ubtn-ok:hover{background:rgba(91,200,240,.3);}
+.ubtn-del{background:rgba(204,0,0,.12);border:1px solid rgba(204,0,0,.25);color:var(--rl);}.ubtn-del:hover{background:rgba(204,0,0,.25);}
+
+/* EXPORT MODAL */
+#export-modal{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;padding:1rem;}
+#export-modal.show{display:flex;}
+.export-box{background:var(--k1);border:1px solid var(--bd2);border-radius:14px;width:100%;max-width:500px;padding:2rem;text-align:center;}
+.export-icon{font-size:3rem;margin-bottom:.75rem;}
+.export-title{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:.05em;margin-bottom:.5rem;}
+.export-sub{font-size:.82rem;color:var(--mu);line-height:1.7;margin-bottom:1.5rem;}
+.export-sub strong{color:var(--green);}
+.export-steps{background:var(--k3);border-radius:8px;padding:1rem 1.2rem;text-align:left;margin-bottom:1.5rem;display:flex;flex-direction:column;gap:.6rem;}
+.step{font-size:.78rem;color:var(--w2);display:flex;gap:.6rem;align-items:flex-start;line-height:1.5;}
+.step-n{background:var(--r);color:#fff;font-family:'Bebas Neue',sans-serif;font-size:.75rem;min-width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;}
+.export-btns{display:flex;gap:.6rem;justify-content:center;}
+
+.no-results{text-align:center;padding:4rem 2rem;color:var(--mu);font-size:.9rem;}
+
+/* TOAST */
+#toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(80px);background:var(--k2);border:1px solid var(--bd2);border-radius:8px;padding:.65rem 1.2rem;font-size:.8rem;z-index:999;transition:transform .3s;white-space:nowrap;pointer-events:none;}
+#toast.show{transform:translateX(-50%) translateY(0);}
+#toast.ok{border-color:rgba(34,197,94,.5);color:var(--green);}
+#toast.err{border-color:rgba(204,0,0,.5);color:var(--rl);}
+#toast.info{border-color:rgba(91,200,240,.4);color:var(--blue);}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loading">
+  <div id="load-spinner" style="display:flex;flex-direction:column;align-items:center;gap:1rem">
+    <div class="spinner"></div>
+    <div class="load-txt">Carregando dados do Netlify…</div>
+  </div>
+  <div id="load-err">
+    <div class="err-icon">⚠️</div>
+    <p>Não foi possível carregar o <code>dados.json</code> do Netlify.</p>
+    <small id="err-detail"></small>
+    <button class="btn btn-blue" style="margin-top:.5rem" onclick="fetchData()">↻ Tentar novamente</button>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header id="hdr" style="display:none">
+  <svg width="34" height="34" viewBox="0 0 80 80" fill="none" style="flex-shrink:0">
+    <path d="M40 4 L72 16 L72 44 Q72 62 40 76 Q8 62 8 44 L8 16 Z" fill="#CC0000"/>
+    <path d="M14 19 L66 19 L66 44 Q66 59 40 71 Q14 59 14 44 Z" fill="#1A1A1A"/>
+    <text x="40" y="50" font-family="Bebas Neue,sans-serif" font-size="22" fill="white" text-anchor="middle">SPFC</text>
+  </svg>
+  <div class="logo">São Paulo FC <span>·</span> Admin</div>
+  <div class="admin-badge">Fotos</div>
+  <div class="netlify-badge">fichariospfc.netlify.app</div>
+  <div class="hactions">
+    <div class="stat-chip green">Editados: <span id="h-edited">0</span></div>
+    <div class="stat-chip blue">Com foto: <span id="h-foto">0</span></div>
+    <button class="btn btn-blue" id="btn-reload">↻ Recarregar</button>
+    <button class="btn btn-green" id="btn-export">⬇ Exportar dados.json</button>
+  </div>
+</header>
+
+<!-- TOOLBAR -->
+<div class="toolbar" id="toolbar" style="display:none">
+  <div class="search-wrap">
+    <span class="s-icon">🔍</span>
+    <input type="text" id="search" placeholder="Buscar jogador…" autocomplete="off">
+  </div>
+  <select class="sel" id="pos-filter">
+    <option value="ALL">Todas as posições</option>
+    <option value="GL">GL — Goleiro</option>
+    <option value="LD">LD — Lateral Direito</option>
+    <option value="LE">LE — Lateral Esquerdo</option>
+    <option value="ZG">ZG — Zagueiro</option>
+    <option value="DF">DF — Defensor</option>
+    <option value="VL">VL — Volante</option>
+    <option value="MC">MC — Meio-Campo</option>
+    <option value="AT">AT — Atacante</option>
+  </select>
+  <select class="sel" id="foto-filter">
+    <option value="ALL">Todos</option>
+    <option value="WITH">Com foto</option>
+    <option value="WITHOUT">Sem foto</option>
+    <option value="EDITED">Editados agora</option>
+  </select>
+  <div class="stats-bar">
+    <div class="stat-chip">Total: <span id="s-total">0</span></div>
+    <div class="stat-chip green">Editados: <span id="s-edited">0</span></div>
+    <div class="stat-chip blue">Com foto: <span id="s-foto">0</span></div>
+  </div>
+</div>
+
+<!-- GRID -->
+<div class="grid-wrap" id="grid-wrap" style="display:none"></div>
+
+<!-- EXPORT MODAL -->
+<div id="export-modal">
+  <div class="export-box">
+    <div class="export-icon">⬇️</div>
+    <div class="export-title">Exportar dados.json</div>
+    <div class="export-sub">
+      O arquivo exportado terá <strong>todas as URLs de foto</strong> já salvas dentro do JSON.<br>
+      Basta substituir no Netlify e todos verão as fotos.
+    </div>
+    <div class="export-steps">
+      <div class="step"><div class="step-n">1</div><div>Clique em <strong>Baixar dados.json</strong></div></div>
+      <div class="step"><div class="step-n">2</div><div>Acesse <strong>app.netlify.com</strong> → seu site → <em>Deploys</em> → arraste apenas o novo <code>dados.json</code></div></div>
+      <div class="step"><div class="step-n">3</div><div>Aguarde o deploy (segundos) — todos os visitantes verão as fotos 🎉</div></div>
+    </div>
+    <div class="export-btns">
+      <button class="btn btn-ghost" onclick="document.getElementById('export-modal').classList.remove('show')">Cancelar</button>
+      <button class="btn btn-green" id="btn-download">⬇ Baixar dados.json</button>
+    </div>
+  </div>
+</div>
+
+<!-- FILE INPUT (hidden) -->
+<input type="file" id="file-player" accept="image/*" style="display:none">
+
+<div id="toast"></div>
+
+<script>
+const JSON_URL = 'https://fichariospfc.netlify.app/dados.json';
+const POS_ORDER = ['GL','LD','LE','ZG','DF','VL','MC','AT','LT','RP','—'];
+const POS_NAMES = {GL:'Goleiro',LD:'Lateral Direito',LE:'Lateral Esquerdo',ZG:'Zagueiro',DF:'Defensor',VL:'Volante',MC:'Meio-Campo',AT:'Atacante',LT:'Lateral',RP:'Reserva','—':'Indefinida'};
+
+let DATA = [];
+let edited = new Set();
+let curSearch = '', curPos = 'ALL', curFotoF = 'ALL';
+let fileTargetIdx = -1;
+
+// ── TOAST ──────────────────────────────────────────────────────────
+let toastT;
+function toast(msg, type='ok'){
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show ' + type;
+  clearTimeout(toastT);
+  toastT = setTimeout(()=>{ el.className=''; }, 3000);
+}
+
+// ── FETCH ──────────────────────────────────────────────────────────
+function fetchData(){
+  document.getElementById('load-spinner').style.display='flex';
+  document.getElementById('load-err').style.display='none';
+  document.getElementById('loading').style.display='flex';
+
+  fetch(JSON_URL + '?t=' + Date.now())
+    .then(r=>{ if(!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(json=>{
+      DATA = json;
+      edited.clear();
+      document.getElementById('loading').style.display='none';
+      document.getElementById('hdr').style.display='flex';
+      document.getElementById('toolbar').style.display='flex';
+      document.getElementById('grid-wrap').style.display='block';
+      updateStats();
+      render();
+      toast(`${DATA.length} jogadores carregados!`);
+    })
+    .catch(err=>{
+      document.getElementById('load-spinner').style.display='none';
+      document.getElementById('load-err').style.display='flex';
+      document.getElementById('err-detail').textContent = err.message;
+    });
+}
+
+// auto-load on start
+fetchData();
+
+// reload button
+document.getElementById('btn-reload').addEventListener('click', ()=>{
+  if(edited.size > 0 && !confirm('Existem ' + edited.size + ' edições não exportadas. Recarregar mesmo assim?')) return;
+  fetchData();
+});
+
+// ── STATS ──────────────────────────────────────────────────────────
+function updateStats(){
+  const withFoto = DATA.filter(p=>p.foto).length;
+  document.getElementById('s-total').textContent = DATA.length;
+  document.getElementById('s-edited').textContent = edited.size;
+  document.getElementById('s-foto').textContent = withFoto;
+  document.getElementById('h-edited').textContent = edited.size;
+  document.getElementById('h-foto').textContent = withFoto;
+}
+
+// ── HELPERS ────────────────────────────────────────────────────────
+function norm(s){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(); }
+function initials(n){ return n.split(' ').slice(0,2).map(w=>w[0]||'').join(''); }
+
+// ── FILTERS ────────────────────────────────────────────────────────
+let searchTimer;
+document.getElementById('search').addEventListener('input', e=>{
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(()=>{ curSearch=e.target.value.trim(); render(); }, 200);
+});
+document.getElementById('pos-filter').addEventListener('change', e=>{ curPos=e.target.value; render(); });
+document.getElementById('foto-filter').addEventListener('change', e=>{ curFotoF=e.target.value; render(); });
+
+function getFiltered(){
+  let d = DATA.map((p,i)=>({...p,_idx:i}));
+  if(curPos !== 'ALL') d = d.filter(p=>p.posicao === curPos);
+  if(curSearch){ const q=norm(curSearch); d=d.filter(p=>norm(p.nome).includes(q)||norm(p.nomeCompleto||'').includes(q)); }
+  if(curFotoF === 'WITH')    d = d.filter(p=>!!p.foto);
+  if(curFotoF === 'WITHOUT') d = d.filter(p=>!p.foto);
+  if(curFotoF === 'EDITED')  d = d.filter(p=>edited.has(p._idx));
+  return d;
+}
+
+// ── RENDER ─────────────────────────────────────────────────────────
+function render(){
+  const filtered = getFiltered();
+  const wrap = document.getElementById('grid-wrap');
+
+  if(!filtered.length){
+    wrap.innerHTML = '<div class="no-results">⚽ Nenhum jogador encontrado</div>';
+    return;
+  }
+
+  const groups = {};
+  POS_ORDER.forEach(p=>groups[p]=[]);
+  filtered.forEach(p=>{ if(!groups[p.posicao]) groups[p.posicao]=[]; groups[p.posicao].push(p); });
+
+  let html = '';
+  POS_ORDER.forEach(pos=>{
+    const arr = groups[pos];
+    if(!arr || !arr.length) return;
+    const sorted = [...arr].sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
+    html += `<div class="section-hdr">
+      <span class="pbadge ${pos}">${pos}</span>
+      ${POS_NAMES[pos]||pos}
+      <small style="font-family:'DM Sans',sans-serif;font-size:.68rem;font-weight:400;color:var(--mu)">(${sorted.length})</small>
+    </div>
+    <div class="player-grid">`;
+
+    sorted.forEach(p=>{
+      const idx = p._idx;
+      const isEdited = edited.has(idx);
+      const hasFoto = !!p.foto;
+      const ini = initials(p.nome);
+      const thumbContent = hasFoto
+        ? `<img src="${p.foto}" alt="" onerror="this.style.display='none'">`
+        : `<span class="ini">${ini}</span>`;
+
+      html += `<div class="player-row${hasFoto?' has-foto':''}${isEdited?' edited':''}" id="row-${idx}">
+  <div class="thumb" onclick="triggerFile(${idx})" title="Clique para pré-visualizar arquivo local">
+    ${thumbContent}
+    <div class="ov">📷<span style="font-size:.6rem">arquivo<br>local</span></div>
+  </div>
+  <div class="player-info">
+    <div class="player-name">${p.nome}</div>
+    <div class="player-meta">${p.posicao} · ${p.ano} · ${p.jogos} jogo${p.jogos!==1?'s':''}</div>
+    <div class="url-field">
+      <input type="text"
+        id="url-${idx}"
+        placeholder="Cole a URL do Cloudinary ou Imgur…"
+        value="${p.foto||''}"
+        oninput="onUrlInput(${idx},this)"
+        onkeydown="if(event.key==='Enter') applyUrl(${idx})">
+      <button class="ubtn ubtn-ok" onclick="applyUrl(${idx})" title="Aplicar URL">✓</button>
+      ${hasFoto ? `<button class="ubtn ubtn-del" onclick="removeFoto(${idx})" title="Remover foto">✕</button>` : ''}
+    </div>
+  </div>
+</div>`;
+    });
+
+    html += '</div>';
+  });
+
+  wrap.innerHTML = html;
+}
+
+// ── URL ACTIONS ────────────────────────────────────────────────────
+function onUrlInput(idx, el){
+  el.classList.toggle('changed', el.value.trim() !== (DATA[idx].foto||''));
+}
+
+function applyUrl(idx){
+  const inp = document.getElementById('url-'+idx);
+  const url = inp.value.trim();
+  if(url && !url.startsWith('http')){ toast('URL deve começar com http…','err'); return; }
+  DATA[idx].foto = url || null;
+  edited.add(idx);
+  inp.classList.remove('changed');
+  updateStats();
+  rerenderRow(idx);
+  toast(url ? '✓ URL salva' : '✓ Foto removida');
+}
+
+function removeFoto(idx){
+  DATA[idx].foto = null;
+  const inp = document.getElementById('url-'+idx);
+  if(inp) inp.value = '';
+  edited.add(idx);
+  updateStats();
+  rerenderRow(idx);
+  toast('Foto removida');
+}
+
+function rerenderRow(idx){
+  const row = document.getElementById('row-'+idx);
+  if(!row) return;
+  const p = DATA[idx];
+  const hasFoto = !!p.foto;
+  const isEdited = edited.has(idx);
+  const ini = initials(p.nome);
+
+  row.className = `player-row${hasFoto?' has-foto':''}${isEdited?' edited':''}`;
+
+  const th = row.querySelector('.thumb');
+  if(th) th.innerHTML = (hasFoto
+    ? `<img src="${p.foto}" alt="" onerror="this.style.display='none'">`
+    : `<span class="ini">${ini}</span>`)
+    + '<div class="ov">📷<span style="font-size:.6rem">arquivo<br>local</span></div>';
+
+  const uf = row.querySelector('.url-field');
+  if(uf) uf.innerHTML = `
+    <input type="text" id="url-${idx}" placeholder="Cole a URL do Cloudinary ou Imgur…"
+      value="${p.foto||''}" oninput="onUrlInput(${idx},this)" onkeydown="if(event.key==='Enter') applyUrl(${idx})">
+    <button class="ubtn ubtn-ok" onclick="applyUrl(${idx})">✓</button>
+    ${hasFoto ? `<button class="ubtn ubtn-del" onclick="removeFoto(${idx})">✕</button>` : ''}`;
+}
+
+// ── FILE UPLOAD (preview only) ─────────────────────────────────────
+function triggerFile(idx){
+  fileTargetIdx = idx;
+  document.getElementById('file-player').value = '';
+  document.getElementById('file-player').click();
+}
+document.getElementById('file-player').addEventListener('change', function(){
+  const file = this.files[0];
+  if(!file || fileTargetIdx < 0) return;
+  const r = new FileReader();
+  r.onload = ev=>{
+    // only update thumb preview — don't save to DATA (no URL)
+    const row = document.getElementById('row-'+fileTargetIdx);
+    if(row){
+      const th = row.querySelector('.thumb');
+      if(th) th.innerHTML = `<img src="${ev.target.result}" alt=""><div class="ov">📷<span style="font-size:.6rem">arquivo<br>local</span></div>`;
+    }
+    toast('Prévia local! Suba no Cloudinary e cole a URL para salvar.','info');
+  };
+  r.readAsDataURL(file);
+});
+
+// ── EXPORT ─────────────────────────────────────────────────────────
+document.getElementById('btn-export').addEventListener('click', ()=>{
+  if(edited.size === 0){
+    toast('Nenhuma edição feita ainda.','info');
+    return;
+  }
+  document.getElementById('export-modal').classList.add('show');
+});
+
+document.getElementById('export-modal').addEventListener('click', e=>{
+  if(e.target === document.getElementById('export-modal'))
+    document.getElementById('export-modal').classList.remove('show');
+});
+
+document.getElementById('btn-download').addEventListener('click', ()=>{
+  const json = JSON.stringify(DATA, null, 2);
+  const blob = new Blob([json], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'dados.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  document.getElementById('export-modal').classList.remove('show');
+  toast(`✓ dados.json exportado — ${DATA.filter(p=>p.foto).length} jogadores com foto`);
+});
+</script>
+</body>
+</html>
