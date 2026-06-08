@@ -407,7 +407,7 @@ function openModal(idx){
 function refreshFotoUI(){
   const idx=curModalIdx, foto=getFoto(idx);
   const fp=document.getElementById('fpreview');
-  fp.innerHTML=foto?`<img src="${foto}" onerror="this.parentElement.innerHTML='📷'">` : '📷';
+  fp.innerHTML=foto?`<img src="${foto}" onerror="this.parentElement.innerHTML='📷'">`:\'📷\';
   fp.classList.toggle('filled',!!foto);
   document.getElementById('remove-btn').classList.toggle('show',!!foto);
   document.getElementById('sfotoc').textContent=countFotos();

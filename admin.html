@@ -3,459 +3,546 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SPFC Admin — Gerenciar Fotos</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>SPFC Admin — Fichário</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <style>
-:root{--r:#CC0000;--rd:#990000;--rl:#FF4444;--k:#0D0D0D;--k1:#161616;--k2:#1E1E1E;--k3:#2A2A2A;--k4:#383838;--w:#F0F0EB;--w2:#D8D8D2;--mu:#888;--bd:rgba(255,255,255,0.07);--bd2:rgba(255,255,255,0.15);--green:#22c55e;--blue:#5bc8f0;}
-*{box-sizing:border-box;margin:0;padding:0;}
-html{scroll-behavior:smooth;}
-body{font-family:'DM Sans',sans-serif;background:var(--k);color:var(--w);min-height:100vh;font-size:14px;}
+:root{
+  --r:#CC0000;--rd:#990000;--rl:#FF4444;
+  --k:#0D0D0D;--k1:#141414;--k2:#1A1A1A;--k3:#222;--k4:#2E2E2E;--k5:#3A3A3A;
+  --w:#F0F0EB;--w2:#C8C8C2;--w3:#888;
+  --bd:rgba(255,255,255,0.06);--bd2:rgba(255,255,255,0.12);--bd3:rgba(255,255,255,0.2);
+  --green:#22c55e;--blue:#38bdf8;--yellow:#f59e0b;
+  --r-glow:rgba(204,0,0,0.3);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--k);color:var(--w);min-height:100vh;font-size:14px}
 
-/* LOADING */
-#loading{position:fixed;inset:0;background:var(--k);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:1rem;}
-.spinner{width:48px;height:48px;border:3px solid var(--bd2);border-top-color:var(--r);border-radius:50%;animation:spin .8s linear infinite;}
+/* ── LOADING ── */
+#loading{position:fixed;inset:0;background:var(--k);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:1.2rem;transition:opacity .4s}
+#loading.hide{opacity:0;pointer-events:none}
+.spin{width:44px;height:44px;border:2.5px solid var(--bd2);border-top-color:var(--r);border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.load-txt{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.1em;color:var(--mu);}
-#load-err{display:none;flex-direction:column;align-items:center;gap:1rem;text-align:center;}
-#load-err .err-icon{font-size:2.5rem;}
-#load-err p{color:var(--mu);font-size:.85rem;max-width:360px;line-height:1.6;}
-#load-err small{color:var(--rl);font-size:.75rem;}
+.load-label{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.15em;color:var(--w3)}
+#load-err{display:none;flex-direction:column;align-items:center;gap:.75rem;text-align:center;padding:2rem}
+#load-err .err-ico{font-size:2.5rem}
+#load-err p{color:var(--w3);font-size:.82rem;max-width:340px;line-height:1.6}
+#load-err code{background:var(--k3);padding:.2rem .5rem;border-radius:4px;font-size:.75rem;color:var(--rl)}
+#load-err .retry-btn{margin-top:.5rem}
 
-/* HEADER */
-header{background:var(--k1);border-bottom:3px solid var(--r);padding:1rem 2rem;display:flex;align-items:center;gap:1rem;position:sticky;top:0;z-index:100;}
-.logo{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:.06em;}
-.logo span{color:var(--rl);}
-.admin-badge{background:rgba(204,0,0,.2);border:1px solid rgba(204,0,0,.4);color:var(--rl);font-size:.68rem;font-weight:600;padding:.2rem .6rem;border-radius:4px;letter-spacing:.1em;text-transform:uppercase;}
-.netlify-badge{font-size:.68rem;color:rgba(91,200,240,.7);background:rgba(91,200,240,.08);border:1px solid rgba(91,200,240,.2);padding:.2rem .6rem;border-radius:4px;}
-.hactions{margin-left:auto;display:flex;gap:.6rem;align-items:center;}
+/* ── HEADER ── */
+header{background:var(--k1);border-bottom:2px solid var(--r);padding:.9rem 1.8rem;display:flex;align-items:center;gap:1rem;position:sticky;top:0;z-index:200}
+.logo-txt{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:.06em;line-height:1}
+.logo-txt span{color:var(--rl)}
+.admin-pill{font-size:.62rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;background:rgba(204,0,0,.18);border:1px solid rgba(204,0,0,.35);color:var(--rl);padding:.2rem .55rem;border-radius:20px}
+.netlify-pill{font-size:.62rem;color:rgba(56,189,248,.75);background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.2);padding:.2rem .55rem;border-radius:20px}
+.hgap{flex:1}
+.hchips{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+.chip{font-size:.72rem;padding:.25rem .65rem;border-radius:20px;background:var(--k3);border:1px solid var(--bd2);color:var(--w3)}
+.chip b{color:var(--w);font-weight:600}
+.chip.green b{color:var(--green)}
+.chip.blue b{color:var(--blue)}
+.chip.edited b{color:var(--yellow)}
 
-/* BUTTONS */
-.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.5rem 1.1rem;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:500;cursor:pointer;transition:all .15s;border:none;white-space:nowrap;}
-.btn-primary{background:var(--r);color:#fff;}.btn-primary:hover{background:var(--rd);}
-.btn-green{background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.4);color:var(--green);}.btn-green:hover{background:rgba(34,197,94,.25);}
-.btn-blue{background:rgba(91,200,240,.12);border:1px solid rgba(91,200,240,.3);color:var(--blue);}.btn-blue:hover{background:rgba(91,200,240,.22);}
-.btn-ghost{background:var(--k3);border:1px solid var(--bd2);color:var(--w2);}.btn-ghost:hover{border-color:var(--rl);color:var(--rl);}
-.btn-danger{background:rgba(204,0,0,.12);border:1px solid rgba(204,0,0,.3);color:var(--rl);}.btn-danger:hover{background:rgba(204,0,0,.25);}
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:.35rem;padding:.45rem 1rem;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:.75rem;font-weight:500;cursor:pointer;transition:all .15s;border:none;white-space:nowrap;line-height:1}
+.btn-red{background:var(--r);color:#fff}.btn-red:hover{background:var(--rd)}
+.btn-green{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.35);color:var(--green)}.btn-green:hover{background:rgba(34,197,94,.22)}
+.btn-blue{background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.25);color:var(--blue)}.btn-blue:hover{background:rgba(56,189,248,.2)}
+.btn-ghost{background:var(--k3);border:1px solid var(--bd2);color:var(--w2)}.btn-ghost:hover{border-color:var(--rl);color:var(--rl)}
+.btn-yellow{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);color:var(--yellow)}.btn-yellow:hover{background:rgba(245,158,11,.2)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
 
-/* TOOLBAR */
-.toolbar{background:var(--k2);border-bottom:1px solid var(--bd);padding:.75rem 2rem;display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;}
-.search-wrap{position:relative;flex:1;min-width:200px;}
-.search-wrap input{width:100%;background:var(--k3);border:1px solid var(--bd);color:var(--w);padding:.5rem .9rem .5rem 2.4rem;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:.8rem;outline:none;transition:border-color .2s;}
-.search-wrap input:focus{border-color:var(--rl);}
-.search-wrap input::placeholder{color:var(--mu);}
-.s-icon{position:absolute;left:.7rem;top:50%;transform:translateY(-50%);color:var(--mu);font-size:.85rem;pointer-events:none;}
-select.sel{background:var(--k3);border:1px solid var(--bd);color:var(--w);padding:.45rem .7rem;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:.75rem;outline:none;cursor:pointer;}
-.stats-bar{display:flex;gap:1.2rem;margin-left:auto;align-items:center;flex-shrink:0;}
-.stat-chip{font-size:.72rem;color:var(--mu);}
-.stat-chip span{font-weight:600;color:var(--w);}
-.stat-chip.green span{color:var(--green);}
-.stat-chip.blue span{color:var(--blue);}
+/* ── TOOLBAR ── */
+#toolbar{background:var(--k1);border-bottom:1px solid var(--bd);padding:.65rem 1.8rem;display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;position:sticky;top:57px;z-index:100}
+.search-wrap{position:relative;flex:1;min-width:180px;max-width:320px}
+.search-wrap input{width:100%;background:var(--k3);border:1px solid var(--bd2);color:var(--w);padding:.45rem .8rem .45rem 2.2rem;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:.78rem;outline:none;transition:border-color .2s}
+.search-wrap input:focus{border-color:var(--r)}
+.search-wrap input::placeholder{color:var(--w3)}
+.search-ico{position:absolute;left:.65rem;top:50%;transform:translateY(-50%);color:var(--w3);font-size:.8rem;pointer-events:none}
+.sel{background:var(--k3);border:1px solid var(--bd2);color:var(--w2);padding:.42rem .65rem;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:.75rem;outline:none;cursor:pointer}
+.sel:focus{border-color:var(--r)}
+.pos-filters{display:flex;gap:.3rem;flex-wrap:wrap}
+.pf{background:var(--k3);border:1px solid var(--bd);color:var(--w3);padding:.3rem .6rem;border-radius:4px;font-size:.7rem;font-weight:600;cursor:pointer;transition:all .12s;letter-spacing:.04em}
+.pf:hover{border-color:var(--bd3);color:var(--w)}
+.pf.on{background:var(--r);border-color:var(--r);color:#fff}
+#result-count{font-size:.72rem;color:var(--w3);margin-left:auto;white-space:nowrap}
 
-/* POSITION BADGES */
-.pbadge{font-family:'Bebas Neue',sans-serif;font-size:.78rem;letter-spacing:.1em;padding:.2rem .6rem;border-radius:4px;}
-.GL{background:#0d2a40;color:#5bc8f0;}.LD{background:#0d2a0d;color:#5af05a;}.LE{background:#0d2a0d;color:#5af05a;}
-.ZG{background:#1e0d35;color:#b87af5;}.DF{background:#2a2a0d;color:#efd05a;}.VL{background:#35120d;color:#f07a5b;}
-.MC{background:#35200d;color:#f0a85a;}.AT{background:#35100d;color:#f05a5a;}.LT{background:#0d2a2a;color:#5af0f0;}.RP{background:#252525;color:#999;}
+/* ── GRID ── */
+#main{padding:1.2rem 1.8rem;max-width:1400px;margin:0 auto}
+#grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:.75rem}
 
-/* GRID */
-.grid-wrap{padding:1.5rem 2rem;}
-.section-hdr{font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:.06em;color:var(--mu);margin-bottom:.75rem;display:flex;align-items:center;gap:.6rem;}
-.player-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:.55rem;margin-bottom:2rem;}
+/* ── PLAYER CARD ── */
+.pcard{background:var(--k2);border:1px solid var(--bd);border-radius:10px;overflow:hidden;transition:border-color .2s,box-shadow .2s}
+.pcard:hover{border-color:var(--bd3)}
+.pcard.has-foto{border-left:3px solid var(--green)}
+.pcard.edited{border-left:3px solid var(--yellow)!important}
+.pcard.has-foto.edited{border-left:3px solid var(--blue)!important}
 
-/* PLAYER ROW */
-.player-row{background:var(--k2);border:1px solid var(--bd);border-radius:8px;padding:.75rem;display:flex;gap:.75rem;align-items:center;transition:border-color .15s;}
-.player-row:hover{border-color:var(--bd2);}
-.player-row.has-foto{border-left:3px solid var(--green);}
-.player-row.edited{border-left:3px solid var(--blue);}
-.player-row.has-foto.edited{border-left:3px solid var(--blue);}
+.card-top{display:flex;align-items:center;gap:.75rem;padding:.75rem .9rem}
+.thumb{width:48px;height:48px;border-radius:7px;background:var(--k4);border:1px solid var(--bd2);overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb-placeholder{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--w3);letter-spacing:.02em}
+.card-info{flex:1;min-width:0}
+.card-name{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.04em;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-sub{font-size:.7rem;color:var(--w3);margin-top:.15rem;display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
+.pos-badge{font-size:.6rem;font-weight:700;letter-spacing:.07em;padding:.15rem .45rem;border-radius:3px;text-transform:uppercase}
+.pos-GL{background:rgba(56,189,248,.15);color:#38bdf8;border:1px solid rgba(56,189,248,.25)}
+.pos-ZG,.pos-DF{background:rgba(34,197,94,.12);color:#22c55e;border:1px solid rgba(34,197,94,.22)}
+.pos-LD,.pos-LE,.pos-LT{background:rgba(168,85,247,.12);color:#a855f7;border:1px solid rgba(168,85,247,.22)}
+.pos-VL,.pos-MC{background:rgba(245,158,11,.12);color:#f59e0b;border:1px solid rgba(245,158,11,.22)}
+.pos-AT{background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.25)}
+.pos-RP,.pos---{background:var(--k4);color:var(--w3);border:1px solid var(--bd)}
+.card-stats{font-size:.67rem;color:var(--w3)}
 
-/* THUMB */
-.thumb{width:52px;height:52px;border-radius:8px;background:var(--k4);flex-shrink:0;overflow:hidden;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd2);cursor:pointer;position:relative;transition:border-color .2s;}
-.thumb:hover{border-color:var(--blue);}
-.thumb img{width:100%;height:100%;object-fit:cover;}
-.thumb .ini{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--mu);}
-.thumb .ov{position:absolute;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;font-size:.75rem;color:#fff;flex-direction:column;gap:2px;text-align:center;line-height:1.3;}
-.thumb:hover .ov{display:flex;}
+.card-body{padding:0 .9rem .75rem;display:flex;flex-direction:column;gap:.5rem}
+.url-row{display:flex;gap:.4rem;align-items:center}
+.url-input{flex:1;background:var(--k3);border:1px solid var(--bd2);color:var(--w);padding:.38rem .65rem;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:.72rem;outline:none;transition:border-color .2s;min-width:0}
+.url-input:focus{border-color:var(--blue)}
+.url-input.changed{border-color:var(--yellow)}
+.url-input.valid{border-color:var(--green)}
+.ubtn{width:28px;height:28px;border-radius:5px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.75rem;transition:all .12s;flex-shrink:0}
+.ubtn-ok{background:rgba(34,197,94,.15);color:var(--green)}.ubtn-ok:hover{background:rgba(34,197,94,.3)}
+.ubtn-del{background:rgba(239,68,68,.12);color:#ef4444}.ubtn-del:hover{background:rgba(239,68,68,.25)}
+.ubtn-preview{background:var(--k4);color:var(--w3)}.ubtn-preview:hover{color:var(--blue);background:rgba(56,189,248,.1)}
 
-.player-info{flex:1;min-width:0;}
-.player-name{font-size:.82rem;font-weight:600;color:var(--w);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.player-meta{font-size:.63rem;color:var(--mu);margin-top:2px;}
+.titles-row{display:flex;gap:.3rem;flex-wrap:wrap}
+.title-tag{font-size:.62rem;background:rgba(204,0,0,.12);border:1px solid rgba(204,0,0,.2);color:rgba(255,120,120,.8);padding:.15rem .45rem;border-radius:3px;line-height:1.3}
 
-/* URL FIELD */
-.url-field{display:flex;gap:.3rem;margin-top:.45rem;align-items:center;}
-.url-field input{flex:1;background:var(--k3);border:1px solid var(--bd);color:var(--w);padding:.35rem .6rem;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:.7rem;outline:none;transition:border-color .2s;min-width:0;}
-.url-field input:focus{border-color:var(--blue);}
-.url-field input::placeholder{color:var(--mu);}
-.url-field input.changed{border-color:var(--blue);}
-.ubtn{padding:.32rem .55rem;border-radius:5px;font-size:.7rem;cursor:pointer;border:none;flex-shrink:0;transition:all .15s;font-family:'DM Sans',sans-serif;}
-.ubtn-ok{background:rgba(91,200,240,.15);border:1px solid rgba(91,200,240,.3);color:var(--blue);}.ubtn-ok:hover{background:rgba(91,200,240,.3);}
-.ubtn-del{background:rgba(204,0,0,.12);border:1px solid rgba(204,0,0,.25);color:var(--rl);}.ubtn-del:hover{background:rgba(204,0,0,.25);}
+/* ── TOAST ── */
+#toast{position:fixed;bottom:1.5rem;right:1.5rem;z-index:1000;display:flex;flex-direction:column;gap:.4rem;pointer-events:none}
+.toast-item{background:var(--k3);border:1px solid var(--bd2);border-radius:8px;padding:.55rem .9rem;font-size:.78rem;color:var(--w);display:flex;align-items:center;gap:.5rem;animation:toastin .2s ease;pointer-events:auto;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.toast-item.t-green{border-color:rgba(34,197,94,.3);color:var(--green)}
+.toast-item.t-red{border-color:rgba(239,68,68,.3);color:#ef4444}
+.toast-item.t-blue{border-color:rgba(56,189,248,.3);color:var(--blue)}
+@keyframes toastin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 
-/* EXPORT MODAL */
-#export-modal{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;padding:1rem;}
-#export-modal.show{display:flex;}
-.export-box{background:var(--k1);border:1px solid var(--bd2);border-radius:14px;width:100%;max-width:500px;padding:2rem;text-align:center;}
-.export-icon{font-size:3rem;margin-bottom:.75rem;}
-.export-title{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:.05em;margin-bottom:.5rem;}
-.export-sub{font-size:.82rem;color:var(--mu);line-height:1.7;margin-bottom:1.5rem;}
-.export-sub strong{color:var(--green);}
-.export-steps{background:var(--k3);border-radius:8px;padding:1rem 1.2rem;text-align:left;margin-bottom:1.5rem;display:flex;flex-direction:column;gap:.6rem;}
-.step{font-size:.78rem;color:var(--w2);display:flex;gap:.6rem;align-items:flex-start;line-height:1.5;}
-.step-n{background:var(--r);color:#fff;font-family:'Bebas Neue',sans-serif;font-size:.75rem;min-width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;}
-.export-btns{display:flex;gap:.6rem;justify-content:center;}
+/* ── EXPORT MODAL ── */
+#export-modal{position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(4px)}
+#export-modal.show{display:flex}
+.exp-box{background:var(--k2);border:1px solid var(--bd3);border-radius:14px;width:100%;max-width:480px;padding:2rem;text-align:center}
+.exp-ico{font-size:2.5rem;margin-bottom:.75rem}
+.exp-title{font-family:'Bebas Neue',sans-serif;font-size:1.9rem;letter-spacing:.05em;margin-bottom:.4rem}
+.exp-sub{font-size:.8rem;color:var(--w3);line-height:1.7;margin-bottom:1.2rem}
+.exp-sub strong{color:var(--green)}
+.exp-steps{background:var(--k3);border-radius:8px;padding:.9rem 1.1rem;text-align:left;margin-bottom:1.3rem;display:flex;flex-direction:column;gap:.55rem}
+.exp-step{display:flex;align-items:flex-start;gap:.6rem;font-size:.78rem;color:var(--w2);line-height:1.5}
+.exp-step .sn{width:20px;height:20px;border-radius:50%;background:var(--r);color:#fff;font-size:.65rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:.05rem}
+.exp-step code{background:var(--k4);padding:.1rem .35rem;border-radius:3px;font-size:.72rem;color:var(--blue)}
+.exp-btns{display:flex;gap:.5rem;justify-content:center}
 
-.no-results{text-align:center;padding:4rem 2rem;color:var(--mu);font-size:.9rem;}
+/* ── PREVIEW MODAL ── */
+#preview-modal{position:fixed;inset:0;z-index:700;background:rgba(0,0,0,.9);display:none;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(6px)}
+#preview-modal.show{display:flex}
+.prev-box{background:var(--k2);border:1px solid var(--bd3);border-radius:12px;padding:1.5rem;max-width:400px;width:100%;text-align:center;position:relative}
+.prev-close{position:absolute;top:.75rem;right:.75rem;background:var(--k4);border:none;color:var(--w3);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:.9rem;display:flex;align-items:center;justify-content:center}
+.prev-close:hover{color:var(--w)}
+#prev-img{width:180px;height:180px;object-fit:cover;border-radius:8px;border:1px solid var(--bd2);margin:.5rem auto;display:block}
+#prev-name{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:.04em;margin-top:.6rem}
+#prev-url{font-size:.65rem;color:var(--w3);word-break:break-all;margin-top:.4rem}
 
-/* TOAST */
-#toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(80px);background:var(--k2);border:1px solid var(--bd2);border-radius:8px;padding:.65rem 1.2rem;font-size:.8rem;z-index:999;transition:transform .3s;white-space:nowrap;pointer-events:none;}
-#toast.show{transform:translateX(-50%) translateY(0);}
-#toast.ok{border-color:rgba(34,197,94,.5);color:var(--green);}
-#toast.err{border-color:rgba(204,0,0,.5);color:var(--rl);}
-#toast.info{border-color:rgba(91,200,240,.4);color:var(--blue);}
+/* ── EMPTY ── */
+#empty{display:none;text-align:center;padding:4rem 2rem;color:var(--w3)}
+#empty svg{opacity:.2;margin-bottom:1rem}
+#empty p{font-size:.85rem}
+
+/* ── PAGINATION ── */
+#pagination{display:flex;justify-content:center;align-items:center;gap:.4rem;padding:1.5rem 0 2.5rem;flex-wrap:wrap}
+.pgbtn{background:var(--k3);border:1px solid var(--bd2);color:var(--w3);padding:.35rem .7rem;border-radius:5px;font-size:.75rem;cursor:pointer;transition:all .12s}
+.pgbtn:hover{border-color:var(--bd3);color:var(--w)}
+.pgbtn.on{background:var(--r);border-color:var(--r);color:#fff}
+.pgbtn:disabled{opacity:.3;cursor:not-allowed}
+#pg-info{font-size:.72rem;color:var(--w3);margin:0 .3rem}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--k)}
+::-webkit-scrollbar-thumb{background:var(--k5);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--w3)}
 </style>
 </head>
 <body>
 
 <!-- LOADING -->
 <div id="loading">
-  <div id="load-spinner" style="display:flex;flex-direction:column;align-items:center;gap:1rem">
-    <div class="spinner"></div>
-    <div class="load-txt">Carregando dados do Netlify…</div>
-  </div>
+  <div class="spin"></div>
+  <div class="load-label">Carregando fichário…</div>
   <div id="load-err">
-    <div class="err-icon">⚠️</div>
-    <p>Não foi possível carregar o <code>dados.json</code> do Netlify.</p>
+    <div class="err-ico">⚠️</div>
+    <p>Não foi possível carregar <code>dados.json</code>.<br>Verifique se o site está online e tente novamente.</p>
     <small id="err-detail"></small>
-    <button class="btn btn-blue" style="margin-top:.5rem" onclick="fetchData()">↻ Tentar novamente</button>
+    <button class="btn btn-blue retry-btn" onclick="fetchData()">↻ Tentar novamente</button>
   </div>
 </div>
 
 <!-- HEADER -->
-<header id="hdr" style="display:none">
-  <svg width="34" height="34" viewBox="0 0 80 80" fill="none" style="flex-shrink:0">
-    <path d="M40 4 L72 16 L72 44 Q72 62 40 76 Q8 62 8 44 L8 16 Z" fill="#CC0000"/>
-    <path d="M14 19 L66 19 L66 44 Q66 59 40 71 Q14 59 14 44 Z" fill="#1A1A1A"/>
-    <text x="40" y="50" font-family="Bebas Neue,sans-serif" font-size="22" fill="white" text-anchor="middle">SPFC</text>
-  </svg>
-  <div class="logo">São Paulo FC <span>·</span> Admin</div>
-  <div class="admin-badge">Fotos</div>
-  <div class="netlify-badge">fichariospfc.netlify.app</div>
-  <div class="hactions">
-    <div class="stat-chip green">Editados: <span id="h-edited">0</span></div>
-    <div class="stat-chip blue">Com foto: <span id="h-foto">0</span></div>
-    <button class="btn btn-blue" id="btn-reload">↻ Recarregar</button>
-    <button class="btn btn-green" id="btn-export">⬇ Exportar dados.json</button>
+<header>
+  <div class="logo-txt">SPFC <span>Admin</span></div>
+  <div class="admin-pill">painel</div>
+  <div class="netlify-pill" id="site-url">fichariospfc.netlify.app</div>
+  <div class="hgap"></div>
+  <div class="hchips">
+    <div class="chip">Total <b id="h-total">—</b></div>
+    <div class="chip green">Com foto <b id="h-foto">0</b></div>
+    <div class="chip edited">Editados <b id="h-edited">0</b></div>
   </div>
+  <button class="btn btn-ghost" onclick="reloadConfirm()" title="Recarregar do servidor">↻</button>
+  <button class="btn btn-yellow" id="btn-discard" style="display:none" onclick="discardAll()">✕ Descartar</button>
+  <button class="btn btn-green" id="btn-export" disabled onclick="openExport()">⬇ Exportar JSON</button>
 </header>
 
 <!-- TOOLBAR -->
-<div class="toolbar" id="toolbar" style="display:none">
+<div id="toolbar">
   <div class="search-wrap">
-    <span class="s-icon">🔍</span>
-    <input type="text" id="search" placeholder="Buscar jogador…" autocomplete="off">
+    <span class="search-ico">🔍</span>
+    <input type="text" id="search" placeholder="Buscar por nome…" oninput="applyFilters()">
   </div>
-  <select class="sel" id="pos-filter">
-    <option value="ALL">Todas as posições</option>
+  <select class="sel" id="pos-sel" onchange="applyFilters()">
+    <option value="">Todas posições</option>
     <option value="GL">GL — Goleiro</option>
-    <option value="LD">LD — Lateral Direito</option>
-    <option value="LE">LE — Lateral Esquerdo</option>
     <option value="ZG">ZG — Zagueiro</option>
     <option value="DF">DF — Defensor</option>
+    <option value="LD">LD — Lateral-direito</option>
+    <option value="LE">LE — Lateral-esquerdo</option>
     <option value="VL">VL — Volante</option>
-    <option value="MC">MC — Meio-Campo</option>
+    <option value="MC">MC — Meia</option>
     <option value="AT">AT — Atacante</option>
   </select>
-  <select class="sel" id="foto-filter">
-    <option value="ALL">Todos</option>
+  <select class="sel" id="foto-sel" onchange="applyFilters()">
+    <option value="">Todas</option>
     <option value="WITH">Com foto</option>
     <option value="WITHOUT">Sem foto</option>
-    <option value="EDITED">Editados agora</option>
   </select>
-  <div class="stats-bar">
-    <div class="stat-chip">Total: <span id="s-total">0</span></div>
-    <div class="stat-chip green">Editados: <span id="s-edited">0</span></div>
-    <div class="stat-chip blue">Com foto: <span id="s-foto">0</span></div>
-  </div>
+  <select class="sel" id="sort-sel" onchange="applyFilters()">
+    <option value="nome">Nome A→Z</option>
+    <option value="ano_desc">Ano mais recente</option>
+    <option value="ano_asc">Ano mais antigo</option>
+    <option value="jogos">Mais jogos</option>
+    <option value="edited">Editados primeiro</option>
+  </select>
+  <span id="result-count">— jogadores</span>
 </div>
 
-<!-- GRID -->
-<div class="grid-wrap" id="grid-wrap" style="display:none"></div>
+<!-- MAIN -->
+<div id="main">
+  <div id="grid"></div>
+  <div id="empty">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <p>Nenhum jogador encontrado com esses filtros.</p>
+  </div>
+  <div id="pagination"></div>
+</div>
 
 <!-- EXPORT MODAL -->
 <div id="export-modal">
-  <div class="export-box">
-    <div class="export-icon">⬇️</div>
-    <div class="export-title">Exportar dados.json</div>
-    <div class="export-sub">
-      O arquivo exportado terá <strong>todas as URLs de foto</strong> já salvas dentro do JSON.<br>
-      Basta substituir no Netlify e todos verão as fotos.
+  <div class="exp-box">
+    <div class="exp-ico">⬇️</div>
+    <div class="exp-title">Exportar dados.json</div>
+    <div class="exp-sub">
+      O arquivo terá <strong id="exp-count">—</strong> URLs de foto salvas.<br>
+      Substitua no Netlify para publicar as atualizações.
     </div>
-    <div class="export-steps">
-      <div class="step"><div class="step-n">1</div><div>Clique em <strong>Baixar dados.json</strong></div></div>
-      <div class="step"><div class="step-n">2</div><div>Acesse <strong>app.netlify.com</strong> → seu site → <em>Deploys</em> → arraste apenas o novo <code>dados.json</code></div></div>
-      <div class="step"><div class="step-n">3</div><div>Aguarde o deploy (segundos) — todos os visitantes verão as fotos 🎉</div></div>
+    <div class="exp-steps">
+      <div class="exp-step"><div class="sn">1</div><div>Clique em <strong>Baixar dados.json</strong> abaixo</div></div>
+      <div class="exp-step"><div class="sn">2</div><div>Acesse <code>app.netlify.com</code> → seu site → <em>Deploys</em> → arraste o novo <code>dados.json</code></div></div>
+      <div class="exp-step"><div class="sn">3</div><div>Aguarde o deploy (segundos) — todos verão as fotos 🎉</div></div>
     </div>
-    <div class="export-btns">
-      <button class="btn btn-ghost" onclick="document.getElementById('export-modal').classList.remove('show')">Cancelar</button>
-      <button class="btn btn-green" id="btn-download">⬇ Baixar dados.json</button>
+    <div class="exp-btns">
+      <button class="btn btn-ghost" onclick="closeExport()">Cancelar</button>
+      <button class="btn btn-green" id="btn-download" onclick="downloadJSON()">⬇ Baixar dados.json</button>
     </div>
   </div>
 </div>
 
-<!-- FILE INPUT (hidden) -->
-<input type="file" id="file-player" accept="image/*" style="display:none">
+<!-- PREVIEW MODAL -->
+<div id="preview-modal" onclick="closePreview()">
+  <div class="prev-box" onclick="event.stopPropagation()">
+    <button class="prev-close" onclick="closePreview()">✕</button>
+    <img id="prev-img" src="" alt="Preview">
+    <div id="prev-name"></div>
+    <div id="prev-url"></div>
+  </div>
+</div>
 
+<!-- TOASTS -->
 <div id="toast"></div>
 
 <script>
-const JSON_URL = new URL('dados.json', document.baseURI).href;
-const POS_ORDER = ['GL','LD','LE','ZG','DF','VL','MC','AT','LT','RP','—'];
-const POS_NAMES = {GL:'Goleiro',LD:'Lateral Direito',LE:'Lateral Esquerdo',ZG:'Zagueiro',DF:'Defensor',VL:'Volante',MC:'Meio-Campo',AT:'Atacante',LT:'Lateral',RP:'Reserva','—':'Indefinida'};
+const JSON_URL = 'https://fichariospfc.netlify.app/dados.json';
+const PAGE_SIZE = 40;
 
 let DATA = [];
+let filtered = [];
 let edited = new Set();
-let curSearch = '', curPos = 'ALL', curFotoF = 'ALL';
-let fileTargetIdx = -1;
+let curPage = 1;
 
-// ── TOAST ──────────────────────────────────────────────────────────
-let toastT;
-function toast(msg, type='ok'){
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className = 'show ' + type;
-  clearTimeout(toastT);
-  toastT = setTimeout(()=>{ el.className=''; }, 3000);
-}
-
-// ── FETCH ──────────────────────────────────────────────────────────
+// ── FETCH ────────────────────────────────────────────────
 function fetchData(){
-  document.getElementById('load-spinner').style.display='flex';
-  document.getElementById('load-err').style.display='none';
-  document.getElementById('loading').style.display='flex';
+  const loading = document.getElementById('loading');
+  const errEl = document.getElementById('load-err');
+  loading.classList.remove('hide');
+  errEl.style.display = 'none';
+  document.querySelector('.load-label').style.display = '';
 
   fetch(JSON_URL + '?t=' + Date.now())
-    .then(r=>{ if(!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-    .then(json=>{
-      DATA = json;
+    .then(r => { if(!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(data => {
+      DATA = data;
       edited.clear();
-      document.getElementById('loading').style.display='none';
-      document.getElementById('hdr').style.display='flex';
-      document.getElementById('toolbar').style.display='flex';
-      document.getElementById('grid-wrap').style.display='block';
-      updateStats();
-      render();
-      toast(`${DATA.length} jogadores carregados!`);
+      curPage = 1;
+      updateHeader();
+      applyFilters();
+      loading.classList.add('hide');
+      setTimeout(() => loading.style.display = 'none', 450);
     })
-    .catch(err=>{
-      document.getElementById('load-spinner').style.display='none';
-      document.getElementById('load-err').style.display='flex';
+    .catch(err => {
+      document.querySelector('.load-label').style.display = 'none';
       document.getElementById('err-detail').textContent = err.message;
+      errEl.style.display = 'flex';
     });
 }
 
-// auto-load on start
-fetchData();
-
-// reload button
-document.getElementById('btn-reload').addEventListener('click', ()=>{
-  if(edited.size > 0 && !confirm('Existem ' + edited.size + ' edições não exportadas. Recarregar mesmo assim?')) return;
+function reloadConfirm(){
+  if(edited.size > 0 && !confirm('Existem ' + edited.size + ' edições não exportadas. Recarregar?')) return;
   fetchData();
-});
+}
 
-// ── STATS ──────────────────────────────────────────────────────────
-function updateStats(){
-  const withFoto = DATA.filter(p=>p.foto).length;
-  document.getElementById('s-total').textContent = DATA.length;
-  document.getElementById('s-edited').textContent = edited.size;
-  document.getElementById('s-foto').textContent = withFoto;
-  document.getElementById('h-edited').textContent = edited.size;
+// ── HEADER STATS ──────────────────────────────────────────
+function updateHeader(){
+  const withFoto = DATA.filter(p => p.foto).length;
+  document.getElementById('h-total').textContent = DATA.length;
   document.getElementById('h-foto').textContent = withFoto;
+  document.getElementById('h-edited').textContent = edited.size;
+  const hasEdits = edited.size > 0;
+  document.getElementById('btn-export').disabled = !hasEdits;
+  document.getElementById('btn-discard').style.display = hasEdits ? '' : 'none';
 }
 
-// ── HELPERS ────────────────────────────────────────────────────────
-function norm(s){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(); }
-function initials(n){ return n.split(' ').slice(0,2).map(w=>w[0]||'').join(''); }
+// ── FILTERS & SORT ────────────────────────────────────────
+function applyFilters(){
+  const q = document.getElementById('search').value.trim().toLowerCase();
+  const pos = document.getElementById('pos-sel').value;
+  const fotoF = document.getElementById('foto-sel').value;
+  const sort = document.getElementById('sort-sel').value;
 
-// ── FILTERS ────────────────────────────────────────────────────────
-let searchTimer;
-document.getElementById('search').addEventListener('input', e=>{
-  clearTimeout(searchTimer);
-  searchTimer = setTimeout(()=>{ curSearch=e.target.value.trim(); render(); }, 200);
-});
-document.getElementById('pos-filter').addEventListener('change', e=>{ curPos=e.target.value; render(); });
-document.getElementById('foto-filter').addEventListener('change', e=>{ curFotoF=e.target.value; render(); });
+  filtered = DATA.map((p, i) => ({...p, _i: i}));
 
-function getFiltered(){
-  let d = DATA.map((p,i)=>({...p,_idx:i}));
-  if(curPos !== 'ALL') d = d.filter(p=>p.posicao === curPos);
-  if(curSearch){ const q=norm(curSearch); d=d.filter(p=>norm(p.nome).includes(q)||norm(p.nomeCompleto||'').includes(q)); }
-  if(curFotoF === 'WITH')    d = d.filter(p=>!!p.foto);
-  if(curFotoF === 'WITHOUT') d = d.filter(p=>!p.foto);
-  if(curFotoF === 'EDITED')  d = d.filter(p=>edited.has(p._idx));
-  return d;
+  if(q) filtered = filtered.filter(p =>
+    p.nome.toLowerCase().includes(q) ||
+    (p.nomeCompleto||'').toLowerCase().includes(q)
+  );
+  if(pos) filtered = filtered.filter(p => p.posicao === pos);
+  if(fotoF === 'WITH') filtered = filtered.filter(p => !!p.foto);
+  if(fotoF === 'WITHOUT') filtered = filtered.filter(p => !p.foto);
+
+  if(sort === 'nome') filtered.sort((a,b) => a.nome.localeCompare(b.nome,'pt-BR'));
+  else if(sort === 'ano_desc') filtered.sort((a,b) => parseInt(b.ano||0)-parseInt(a.ano||0));
+  else if(sort === 'ano_asc') filtered.sort((a,b) => parseInt(a.ano||0)-parseInt(b.ano||0));
+  else if(sort === 'jogos') filtered.sort((a,b) => (b.jogos||0)-(a.jogos||0));
+  else if(sort === 'edited') filtered.sort((a,b) => (edited.has(b._i)?1:0)-(edited.has(a._i)?1:0));
+
+  document.getElementById('result-count').textContent = filtered.length + ' jogador' + (filtered.length !== 1 ? 'es' : '');
+  curPage = 1;
+  renderPage();
 }
 
-// ── RENDER ─────────────────────────────────────────────────────────
-function render(){
-  const filtered = getFiltered();
-  const wrap = document.getElementById('grid-wrap');
+// ── RENDER ────────────────────────────────────────────────
+function renderPage(){
+  const grid = document.getElementById('grid');
+  const empty = document.getElementById('empty');
+  const total = filtered.length;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  curPage = Math.min(curPage, totalPages);
+  const start = (curPage - 1) * PAGE_SIZE;
+  const slice = filtered.slice(start, start + PAGE_SIZE);
 
-  if(!filtered.length){
-    wrap.innerHTML = '<div class="no-results">⚽ Nenhum jogador encontrado</div>';
-    return;
-  }
+  empty.style.display = total === 0 ? 'block' : 'none';
 
-  const groups = {};
-  POS_ORDER.forEach(p=>groups[p]=[]);
-  filtered.forEach(p=>{ if(!groups[p.posicao]) groups[p.posicao]=[]; groups[p.posicao].push(p); });
+  if(total === 0){ grid.innerHTML = ''; renderPagination(0,1); return; }
 
-  let html = '';
-  POS_ORDER.forEach(pos=>{
-    const arr = groups[pos];
-    if(!arr || !arr.length) return;
-    const sorted = [...arr].sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
-    html += `<div class="section-hdr">
-      <span class="pbadge ${pos}">${pos}</span>
-      ${POS_NAMES[pos]||pos}
-      <small style="font-family:'DM Sans',sans-serif;font-size:.68rem;font-weight:400;color:var(--mu)">(${sorted.length})</small>
+  grid.innerHTML = slice.map(p => cardHTML(p, p._i)).join('');
+  renderPagination(totalPages, curPage);
+}
+
+function cardHTML(p, idx){
+  const hasFoto = !!p.foto;
+  const isEdited = edited.has(idx);
+  const cls = ['pcard', hasFoto?'has-foto':'', isEdited?'edited':''].filter(Boolean).join(' ');
+  const initials = (p.nome||'?').slice(0,2);
+  const thumbHTML = hasFoto
+    ? `<img src="${p.foto}" alt="" onerror="this.style.display='none'">`
+    : `<div class="thumb-placeholder">${initials}</div>`;
+
+  const statsArr = [];
+  if(p.jogos) statsArr.push(`${p.jogos}j`);
+  if(p.vitorias != null && p.jogos) statsArr.push(`${p.vitorias}v`);
+  const stats = statsArr.join(' · ');
+
+  const titlesHTML = (p.titulos||[]).slice(0,3).map(t =>
+    `<span class="title-tag">${t.replace('Campeonato ','').replace('Brasileiro','Br.')}</span>`
+  ).join('');
+
+  const moreT = (p.titulos||[]).length > 3 ? `<span class="title-tag">+${p.titulos.length-3}</span>` : '';
+
+  return `
+<div class="${cls}" id="row-${idx}">
+  <div class="card-top">
+    <div class="thumb">${thumbHTML}</div>
+    <div class="card-info">
+      <div class="card-name" title="${p.nomeCompleto||p.nome}">${p.nome}</div>
+      <div class="card-sub">
+        <span class="pos-badge pos-${p.posicao}">${p.posicao}</span>
+        <span>${p.ano||''}</span>
+        ${stats ? `<span>${stats}</span>` : ''}
+        ${p.nomeCompleto && p.nomeCompleto !== p.nome ? `<span style="color:var(--w2);font-size:.65rem;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.nomeCompleto}</span>` : ''}
+      </div>
     </div>
-    <div class="player-grid">`;
-
-    sorted.forEach(p=>{
-      const idx = p._idx;
-      const isEdited = edited.has(idx);
-      const hasFoto = !!p.foto;
-      const ini = initials(p.nome);
-      const thumbContent = hasFoto
-        ? `<img src="${p.foto}" alt="" onerror="this.style.display='none'">`
-        : `<span class="ini">${ini}</span>`;
-
-      html += `<div class="player-row${hasFoto?' has-foto':''}${isEdited?' edited':''}" id="row-${idx}">
-  <div class="thumb" onclick="triggerFile(${idx})" title="Clique para pré-visualizar arquivo local">
-    ${thumbContent}
-    <div class="ov">📷<span style="font-size:.6rem">arquivo<br>local</span></div>
   </div>
-  <div class="player-info">
-    <div class="player-name">${p.nome}</div>
-    <div class="player-meta">${p.posicao} · ${p.ano} · ${p.jogos} jogo${p.jogos!==1?'s':''}</div>
-    <div class="url-field">
-      <input type="text"
-        id="url-${idx}"
-        placeholder="Cole a URL do Cloudinary ou Imgur…"
+  <div class="card-body">
+    ${(p.titulos||[]).length ? `<div class="titles-row">${titlesHTML}${moreT}</div>` : ''}
+    <div class="url-row">
+      <input class="url-input${hasFoto?' valid':''}" id="inp-${idx}"
+        type="url" placeholder="URL da foto (Cloudinary)…"
         value="${p.foto||''}"
         oninput="onUrlInput(${idx},this)"
         onkeydown="if(event.key==='Enter') applyUrl(${idx})">
-      <button class="ubtn ubtn-ok" onclick="applyUrl(${idx})" title="Aplicar URL">✓</button>
+      <button class="ubtn ubtn-ok" onclick="applyUrl(${idx})" title="Salvar URL">✓</button>
+      ${hasFoto ? `<button class="ubtn ubtn-preview" onclick="openPreview(${idx})" title="Ver foto">👁</button>` : ''}
       ${hasFoto ? `<button class="ubtn ubtn-del" onclick="removeFoto(${idx})" title="Remover foto">✕</button>` : ''}
     </div>
   </div>
 </div>`;
-    });
-
-    html += '</div>';
-  });
-
-  wrap.innerHTML = html;
 }
 
-// ── URL ACTIONS ────────────────────────────────────────────────────
+// ── URL ACTIONS ───────────────────────────────────────────
 function onUrlInput(idx, el){
-  el.classList.toggle('changed', el.value.trim() !== (DATA[idx].foto||''));
+  const val = el.value.trim();
+  el.classList.toggle('changed', val !== (DATA[idx].foto||''));
+  el.classList.remove('valid');
 }
 
 function applyUrl(idx){
-  const inp = document.getElementById('url-'+idx);
-  const url = inp.value.trim();
-  if(url && !url.startsWith('http')){ toast('URL deve começar com http…','err'); return; }
-  DATA[idx].foto = url || null;
+  const el = document.getElementById('inp-' + idx);
+  if(!el) return;
+  const url = el.value.trim();
+  if(!url){ removeFoto(idx); return; }
+
+  // Basic URL validation
+  try { new URL(url); } catch(e){ toast('URL inválida', 'red'); return; }
+
+  DATA[idx].foto = url;
   edited.add(idx);
-  inp.classList.remove('changed');
-  updateStats();
-  rerenderRow(idx);
-  toast(url ? '✓ URL salva' : '✓ Foto removida');
+  updateHeader();
+  refreshCard(idx);
+  toast('Foto salva: ' + DATA[idx].nome, 'green');
 }
 
 function removeFoto(idx){
   DATA[idx].foto = null;
-  const inp = document.getElementById('url-'+idx);
-  if(inp) inp.value = '';
   edited.add(idx);
-  updateStats();
-  rerenderRow(idx);
-  toast('Foto removida');
+  updateHeader();
+  refreshCard(idx);
+  toast('Foto removida: ' + DATA[idx].nome, 'blue');
 }
 
-function rerenderRow(idx){
-  const row = document.getElementById('row-'+idx);
+function refreshCard(idx){
+  const row = document.getElementById('row-' + idx);
   if(!row) return;
+  const p = {...DATA[idx], _i: idx};
+  row.outerHTML = cardHTML(p, idx);
+}
+
+// ── PREVIEW ───────────────────────────────────────────────
+function openPreview(idx){
   const p = DATA[idx];
-  const hasFoto = !!p.foto;
-  const isEdited = edited.has(idx);
-  const ini = initials(p.nome);
-
-  row.className = `player-row${hasFoto?' has-foto':''}${isEdited?' edited':''}`;
-
-  const th = row.querySelector('.thumb');
-  if(th) th.innerHTML = (hasFoto
-    ? `<img src="${p.foto}" alt="" onerror="this.style.display='none'">`
-    : `<span class="ini">${ini}</span>`)
-    + '<div class="ov">📷<span style="font-size:.6rem">arquivo<br>local</span></div>';
-
-  const uf = row.querySelector('.url-field');
-  if(uf) uf.innerHTML = `
-    <input type="text" id="url-${idx}" placeholder="Cole a URL do Cloudinary ou Imgur…"
-      value="${p.foto||''}" oninput="onUrlInput(${idx},this)" onkeydown="if(event.key==='Enter') applyUrl(${idx})">
-    <button class="ubtn ubtn-ok" onclick="applyUrl(${idx})">✓</button>
-    ${hasFoto ? `<button class="ubtn ubtn-del" onclick="removeFoto(${idx})">✕</button>` : ''}`;
+  if(!p.foto) return;
+  document.getElementById('prev-img').src = p.foto;
+  document.getElementById('prev-name').textContent = p.nome;
+  document.getElementById('prev-url').textContent = p.foto;
+  document.getElementById('preview-modal').classList.add('show');
 }
+function closePreview(){ document.getElementById('preview-modal').classList.remove('show'); }
 
-// ── FILE UPLOAD (preview only) ─────────────────────────────────────
-function triggerFile(idx){
-  fileTargetIdx = idx;
-  document.getElementById('file-player').value = '';
-  document.getElementById('file-player').click();
-}
-document.getElementById('file-player').addEventListener('change', function(){
-  const file = this.files[0];
-  if(!file || fileTargetIdx < 0) return;
-  const r = new FileReader();
-  r.onload = ev=>{
-    // only update thumb preview — don't save to DATA (no URL)
-    const row = document.getElementById('row-'+fileTargetIdx);
-    if(row){
-      const th = row.querySelector('.thumb');
-      if(th) th.innerHTML = `<img src="${ev.target.result}" alt=""><div class="ov">📷<span style="font-size:.6rem">arquivo<br>local</span></div>`;
-    }
-    toast('Prévia local! Suba no Cloudinary e cole a URL para salvar.','info');
-  };
-  r.readAsDataURL(file);
-});
-
-// ── EXPORT ─────────────────────────────────────────────────────────
-document.getElementById('btn-export').addEventListener('click', ()=>{
-  if(edited.size === 0){
-    toast('Nenhuma edição feita ainda.','info');
-    return;
-  }
+// ── EXPORT ────────────────────────────────────────────────
+function openExport(){
+  const withFoto = DATA.filter(p => p.foto).length;
+  document.getElementById('exp-count').textContent = withFoto + ' foto' + (withFoto!==1?'s':'');
   document.getElementById('export-modal').classList.add('show');
-});
+}
+function closeExport(){ document.getElementById('export-modal').classList.remove('show'); }
 
-document.getElementById('export-modal').addEventListener('click', e=>{
-  if(e.target === document.getElementById('export-modal'))
-    document.getElementById('export-modal').classList.remove('show');
-});
-
-document.getElementById('btn-download').addEventListener('click', ()=>{
-  const json = JSON.stringify(DATA, null, 2);
-  const blob = new Blob([json], {type:'application/json'});
+function downloadJSON(){
+  const blob = new Blob([JSON.stringify(DATA, null, 2)], {type:'application/json'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = 'dados.json';
   a.click();
   URL.revokeObjectURL(a.href);
-  document.getElementById('export-modal').classList.remove('show');
-  toast(`✓ dados.json exportado — ${DATA.filter(p=>p.foto).length} jogadores com foto`);
+  toast('dados.json baixado com sucesso!', 'green');
+  closeExport();
+  // Reset edited after export
+  edited.clear();
+  updateHeader();
+}
+
+function discardAll(){
+  if(!confirm('Descartar todas as ' + edited.size + ' edições e recarregar do servidor?')) return;
+  fetchData();
+}
+
+// ── PAGINATION ────────────────────────────────────────────
+function renderPagination(total, current){
+  const pg = document.getElementById('pagination');
+  if(total <= 1){ pg.innerHTML=''; return; }
+
+  let html = `<button class="pgbtn" ${current===1?'disabled':''} onclick="goPage(${current-1})">‹ Anterior</button>`;
+
+  const range = pageRange(current, total);
+  let last = 0;
+  for(const n of range){
+    if(n - last > 1) html += `<span style="color:var(--w3);padding:0 .2rem">…</span>`;
+    html += `<button class="pgbtn${n===current?' on':''}" onclick="goPage(${n})">${n}</button>`;
+    last = n;
+  }
+
+  html += `<span id="pg-info">pág ${current}/${total}</span>`;
+  html += `<button class="pgbtn" ${current===total?'disabled':''} onclick="goPage(${current+1})">Próxima ›</button>`;
+  pg.innerHTML = html;
+}
+
+function pageRange(cur, total){
+  const delta = 2;
+  const range = new Set([1, total]);
+  for(let i=Math.max(2,cur-delta); i<=Math.min(total-1,cur+delta); i++) range.add(i);
+  return [...range].sort((a,b)=>a-b);
+}
+
+function goPage(n){
+  curPage = n;
+  renderPage();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+// ── TOAST ─────────────────────────────────────────────────
+function toast(msg, type='green'){
+  const el = document.createElement('div');
+  el.className = 'toast-item t-' + type;
+  el.textContent = msg;
+  document.getElementById('toast').appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+// ── KEYBOARD SHORTCUTS ────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape'){ closePreview(); closeExport(); }
+  if(e.key === '/' && !e.ctrlKey && !e.metaKey && document.activeElement.tagName !== 'INPUT'){
+    e.preventDefault();
+    document.getElementById('search').focus();
+  }
 });
+
+// ── INIT ─────────────────────────────────────────────────
+fetchData();
 </script>
 </body>
 </html>
